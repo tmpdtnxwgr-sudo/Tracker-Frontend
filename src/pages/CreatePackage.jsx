@@ -11,7 +11,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://tracker-umber-seven-50.vercel.app/api";
 
 const initialContact = {
   name: "",

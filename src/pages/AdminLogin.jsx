@@ -32,7 +32,7 @@ export default function AdminLogin() {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:5000/api/auth/login",
+         "https://tracker-umber-seven-50.vercel.app/api/auth/login",
         {
           method: "POST",
           headers: {
