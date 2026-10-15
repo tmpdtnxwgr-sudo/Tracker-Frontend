@@ -34,6 +34,11 @@ export default function TrackingResults() {
         );
 
         const result = await response.json().catch(() => null);
+        console.log("Tracking API response:", result);
+console.log(
+  "Tracking details:",
+  JSON.stringify(result?.data?.tracking, null, 2)
+)
 
         if (!response.ok) {
           throw new Error(
@@ -223,7 +228,9 @@ export default function TrackingResults() {
                     Carrier
                   </p>
                   <p className="mt-2 font-medium">
-                    {packageInfo?.carrier || "Carrier information unavailable"}
+                    {typeof packageInfo?.carrier === "object"
+  ? packageInfo?.carrier?.name || "Carrier information unavailable"
+  : packageInfo?.carrier || "Carrier information unavailable"}
                   </p>
                 </div>
 
