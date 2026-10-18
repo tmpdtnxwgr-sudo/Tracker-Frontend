@@ -86,6 +86,10 @@ export default function AdminPackageDetails() {
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [manualStatus, setManualStatus] = useState("In Transit");
+const [manualLocation, setManualLocation] = useState("");
+const [manualDescription, setManualDescription] = useState("");
+const [updatingManually, setUpdatingManually] = useState(false);
 
   const token = localStorage.getItem("adminToken");
 
@@ -197,6 +201,45 @@ export default function AdminPackageDetails() {
     }
   };
 
+  const handleManualUpdate = async (e) => {
+  e.preventDefault();
+
+  setUpdatingManually(true);
+  setError("");
+  setMessage("");
+
+  try {
+    const response = await fetch(`${API_URL}/packages/${id}/status`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        status: manualStatus,
+        location: manualLocation.trim(),
+        description: manualDescription.trim(),
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Unable to update shipment status.");
+    }
+
+    setMessage("Shipment status updated successfully.");
+    setManualLocation("");
+    setManualDescription("");
+
+    await fetchPackage();
+  } catch (err) {
+    setError(err.message || "Unable to update shipment status.");
+  } finally {
+    setUpdatingManually(false);
+  }
+};
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-black text-gray-300">
@@ -287,6 +330,102 @@ export default function AdminPackageDetails() {
             <span>{message}</span>
           </div>
         )}
+
+        {/* Manual Shipment Status Update */}
+
+<section className="mb-8 rounded-xl border border-gray-700 bg-gray-900 p-6">
+  <h2 className="mb-4 text-xl font-semibold text-white">
+    Update Shipment Status Manually
+  </h2>
+
+  <form onSubmit={handleManualUpdate} className="space-y-4">
+    <div>
+      <label
+        htmlFor="manualStatus"
+        className="mb-2 block text-sm font-medium text-gray-300"
+      >
+        Shipment Status
+      </label>
+
+
+  <select
+    id="manualStatus"
+    value={manualStatus}
+    onChange={(e) => setManualStatus(e.target.value)}
+    required
+    className="w-full rounded-lg border border-gray-700 bg-black p-3 text-white"
+  >
+    {[
+      "Pending",
+      "Shipment Created",
+      "Picked Up",
+      "In Transit",
+      "Arrived at Facility",
+      "Out for Delivery",
+      "Delivered",
+      "Delivery Attempted",
+      "On Hold",
+      "Exception",
+      "Cancelled",
+      "Returned",
+    ].map((status) => (
+      <option key={status} value={status}>
+        {status}
+      </option>
+    ))}
+  </select>
+</div>
+
+<div>
+  <label
+    htmlFor="manualLocation"
+    className="mb-2 block text-sm font-medium text-gray-300"
+  >
+    Current Location
+  </label>
+
+  <input
+    id="manualLocation"
+    type="text"
+    value={manualLocation}
+    onChange={(e) => setManualLocation(e.target.value)}
+    placeholder="e.g. Lagos, Nigeria"
+    required
+    className="w-full rounded-lg border border-gray-700 bg-black p-3 text-white placeholder-gray-500"
+  />
+</div>
+
+<div>
+  <label
+    htmlFor="manualDescription"
+    className="mb-2 block text-sm font-medium text-gray-300"
+  >
+    Update Description
+  </label>
+
+  <textarea
+    id="manualDescription"
+    value={manualDescription}
+    onChange={(e) => setManualDescription(e.target.value)}
+    placeholder="Describe the latest shipment update..."
+    rows={3}
+    required
+    className="w-full rounded-lg border border-gray-700 bg-black p-3 text-white placeholder-gray-500"
+  />
+</div>
+
+<button
+  type="submit"
+  disabled={updatingManually}
+  className="rounded-lg bg-yellow-500 px-5 py-3 font-semibold text-black transition hover:bg-yellow-400 disabled:cursor-not-allowed disabled:opacity-50"
+>
+  {updatingManually ? "Updating Status..." : "Save Status Update"}
+</button>
+
+
+  </form>
+</section>
+
 
         <section className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border border-white/10 bg-[#111111] p-5">
